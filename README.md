@@ -10,6 +10,7 @@ Snakemake recommends installing snakemake using conda. To setup the conda enviro
    ``` yml
    channels:
     - bioconda
+    - conda-forge
     dependencies:
     - snakemake
     - pip
@@ -85,7 +86,7 @@ To use the power of snakemake on our slurm cluster we first need to create a sna
    printshellcmds: True # print the shell commands that will be executed
    ```
 
-5. Now lets define the resource utilization. For this create a file `cluster_config.yml` in the current directory (`~/.config/snakemake/profile_name`). In this file add the default arguments that should be passed to sbatch. Define them using the following format and use correct sbatch expressions. See [the slurm documentation](https://slurm.schedmd.com/sbatch.html#lbAG) for a list of available options.
+5. Now let's define some default resource utilization. For this create a file `cluster_config.yml` in the current directory (`~/.config/snakemake/profile_name`). In this file add the default arguments that should be passed to sbatch. Define them using the following format and use correct sbatch expressions. See [the slurm documentation](https://slurm.schedmd.com/sbatch.html#lbAG) for a list of available options.
 
    ``` yaml
    __default__:
@@ -120,16 +121,32 @@ To use the power of snakemake on our slurm cluster we first need to create a sna
        input:     ...
        output:    ...
        resources:
-           nodes=4, # use 4 nodese
            mem=10000, # use 10GB of memory
-           time=360, # run for 6 hours
+           runtime=360, # run for 6 hours
        shell:
            "..."
    ```
+   If we want to run this rule on multiple nodes in a cluster, things get a little more complicated. 
+   The following example will run an `OpenMPI` program on 2 nodes with 16 cores each and will allocate the entire node.
+   
+   ``` python
+   rule:
+      input:     ...
+      output:    ...
+      threads: 32  # #nodes * #cores-per-node
+      resources:
+         mem=10000, # use 10GB of memory
+         runtime=360, # run for 6 hours
+         nodes=2, # use two nodes
+         cpus_per_task=16,
+         slurm extra="-B 2:8:1 --ntasks-per-node 1 --hint compute_bound",  # some additional options for slurm, check your cluster manual to see what is necessary for your setup
+      shell:
+         "mpirun ..."
+   ```
 
-   For more information on rule specific resources and sbatch options see the [snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#resources). 
+   For more information on rule specific resources and sbatch options see the [snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#resources).
 
-8. Finally we can run the snakemake pipeline. Open the folder containing your `Snakefile`, open a `tmux` session and run
+8. Finally, we can run the snakemake pipeline. Open the folder containing your `Snakefile`, open a `tmux` session and run
    
    ```
    snakemake --profile profile_name
