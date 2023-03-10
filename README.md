@@ -133,7 +133,7 @@ To use the power of snakemake on our slurm cluster we first need to create a sna
    rule:
       input:     ...
       output:    ...
-      threads: 32  # #nodes * #cores-per-node
+      threads: 32  # #thraeds-per-core * #cores-per-node, see details below
       resources:
          mem=10000, # use 10GB of memory
          runtime=360, # run for 6 hours
@@ -143,6 +143,7 @@ To use the power of snakemake on our slurm cluster we first need to create a sna
       shell:
          "mpirun ..."
    ```
+   To allocate an entire node, you have to ask for all threads each node provides. So if one node has 16 cores and 2 threads each, set `threads: 32`. Don't change this number when increasing the number of nodes.
 
    For more information on rule specific resources and sbatch options see the [snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#resources).
 
