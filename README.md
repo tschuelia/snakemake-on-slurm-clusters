@@ -139,7 +139,7 @@ To use the power of snakemake on our slurm cluster we first need to create a sna
          runtime=360, # run for 6 hours
          nodes=2, # use two nodes
          cpus_per_task=16,
-         slurm extra="-B 2:8:1 --ntasks-per-node 1 --hint compute_bound",  # some additional options for slurm, check your cluster manual to see what is necessary for your setup
+         slurm_extra="-B 2:8:1 --ntasks-per-node 1 --hint compute_bound",  # some additional options for slurm, check your cluster manual to see what is necessary for your setup
       shell:
          "mpirun ..."
    ```
