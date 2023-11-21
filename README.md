@@ -11,7 +11,7 @@ Snakemake recommends installing snakemake using conda. To setup the conda enviro
    channels:
     - bioconda
     - conda-forge
-    dependencies:
+   dependencies:
     - snakemake
     - pip
     - pip:
