@@ -30,8 +30,9 @@ To use snakemake on our institute clusters, follow the instructions as provided 
   When you run `clusterstatus`, you will see an output like this: `R (Running) 55` that tells you that you currently have 55 jobs running on the cluster.
 - With the new slurm plugin, jobs should be automatically cancelled when you terminate your snakemake pipeline. However, you should always make sure that this the case (e.g. using `clusterstatus`). If jobs are still running or pending, terminate them manually by running `scancel -u $(whoami)`.
 - You can use `sinfo` to see the current usage of the cluster, how many nodes are idle, used, or down.
-- You can use `squeue` to see the current scheduling queue including the priority of all jobs. 
-
+- You can use `squeue` to see the current scheduling queue including the priority of all jobs.
+- Always write files to the external file system `/hits/fast` and not to your home directory. 
+- Try to separate your jobs into chunks as small as possible and try to allocate as few ressources as possible/reasonable. It is more likely that your jobs will be scheduled soon if you only require a few threads or one node. If you try to do everything at once and ask for 20 nodes, you will have to wait a while for your pipeline to finish. 
 
 <hr>
 
