@@ -1,6 +1,15 @@
 # snakemake-on-slurm-clusters
 This README describes how to run a snakemake pipeline on a cluster using the [Slurm Workload Manager](https://slurm.schedmd.com/overview.html).
 
+
+
+
+
+<hr>
+
+> [!CAUTION]
+> The following description is only applicable to Snakemake version < 8.
+
 ## Setting up the environment
 Snakemake recommends installing snakemake using conda. To setup the conda environment on your cluster follow these steps: 
 
