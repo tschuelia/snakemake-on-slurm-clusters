@@ -1,8 +1,36 @@
 # snakemake-on-slurm-clusters
-This README describes how to run a snakemake pipeline on a cluster using the [Slurm Workload Manager](https://slurm.schedmd.com/overview.html).
+This README describes how to run a snakemake pipeline on a cluster using the [Slurm Workload Manager](https://slurm.schedmd.com/overview.html). Note that this is instruction is targeted specifically for the SLURM cluster setup at my home institute HITS.
 
+With the introduction of Snakemake 8 and the [Snakemake executor plugin for slurm](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html), the setup got a lot easier compared to the older versions 🙂
 
-
+To use snakemake on our institute clusters, follow the instructions as provided in the [plugin's documentation](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html). I just want to note a few things that are special to our clusters: 
+- You don't need to provide a Slurm account and you can omit the `slurm_account` argument in the `--default-resources` command line parameters. Snakemake will issue a warning but this can be safely ignored.
+- You have to specify the maximum number of jobs to submit at once using `--jobs N`. I'd recommend setting `N` to 100 to not spam the waiting queue.
+- Similarly, you can omit the `slurm_partition` argument.
+- The runtime limit on our clusters is 24h and setting the `runtime` parameter for a rule to a higher number will have no effect.
+- Use the `localrules` parameter with care: it's okay to run small jobs (a few seconds without heavy CPU requirements) on the login node, but anything else MUST be submitted.
+- **ALWAYS** make sure your jobs are properly submitted to the cluster and are not running on the login node. If a job was properly submitted, you should see a hint in the log (something like `Job 1 has been submitted with SLURM jobid 1234`). You can also check that you are not hogging ressources on the login node using good old `htop`.
+- In case you want to allocade an entire node, you have to ask for all threads a node provides. So e.g. if one node has 16 cores and 2 threads each, you need to set `threads: 32`.
+- To get a brief summary of your jobs on the cluster (pending, running, ...), create file called `clusterstatus` in `.local/bin` and paste the following small script:
+  ```bash
+     #!/bin/bash squeue -u $(whoami) | awk '
+     BEGIN {
+     abbrev[“R”]=“(Running)“
+     abbrev[“PD”]=”(Pending)“
+     abbrev[“CG”]=”(Completing)“
+     abbrev[“F”]=”(Failed)“
+     }
+     NR>1 {a[$5]++}
+     END {
+     for (i in a) {
+     printf ”%-2s %-12s %d\n”, i, abbrev[i], a[i]
+     }
+     }'
+  ```
+  When you run `clusterstatus`, you will see an output like this: `R (Running) 55` that tells you that you currently have 55 jobs running on the cluster.
+- With the new slurm plugin, jobs should be automatically cancelled when you terminate your snakemake pipeline. However, you should always make sure that this the case (e.g. using `clusterstatus`). If jobs are still running or pending, terminate them manually by running `scancel -u $(whoami)`.
+- You can use `sinfo` to see the current usage of the cluster, how many nodes are idle, used, or down.
+- You can use `squeue` to see the current scheduling queue including the priority of all jobs. 
 
 
 <hr>
